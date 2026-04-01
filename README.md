@@ -88,6 +88,19 @@ Open [http://localhost:3000](http://localhost:3000).
 
 The system accepts either a raw JSON array or `{ "messages": [...] }`.
 
+## Tests
+
+```bash
+npm test        # Run all tests (42 tests across 4 suites)
+npm run test:watch  # Watch mode
+```
+
+Test suites cover:
+- **Validation**: Message schema validation (valid/invalid inputs, channel types, required fields)
+- **JSON parsing**: Code fence stripping, nested objects, error handling
+- **Prompt construction**: Both passes include correct instructions, all message data, security/escalation detection
+- **Data integrity**: Sample dataset structure, sequential IDs, phishing message presence, crisis thread, deal renegotiation
+
 ## Tech stack
 
 - **Next.js 16** (App Router, TypeScript, React 19)
