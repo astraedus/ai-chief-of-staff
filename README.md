@@ -12,7 +12,7 @@ flowchart TB
         A[Messages JSON] --> B[Validation & Parsing]
     end
 
-    subgraph Pass 1 — Independent Classification
+    subgraph Pass 1 -- Independent Classification
         B --> C[Gemini 2.5 Flash]
         C --> D[Per-message classification]
         D --> D1[Category: Ignore / Delegate / Decide]
@@ -21,7 +21,7 @@ flowchart TB
         D --> D4[Drafted response]
     end
 
-    subgraph Pass 2 — Cross-Reference & Synthesis
+    subgraph Pass 2 -- Cross-Reference & Synthesis
         D1 & D2 & D3 & D4 --> E[All messages + classifications fed back]
         E --> F[Gemini 2.5 Flash]
         F --> G[Thread detection]
@@ -107,7 +107,7 @@ The current demo runs both passes synchronously on each request. In production, 
 
 ```mermaid
 flowchart TB
-    subgraph Ingestion — Real-time
+    subgraph Ingestion -- Real-time
         G[Gmail API Watch] --> Q[Message Queue]
         S[Slack Events API] --> Q
         W[WhatsApp Business API] --> Q
@@ -116,7 +116,7 @@ flowchart TB
         P1 --> DB[(Database)]
     end
 
-    subgraph Analysis — Batch, 6am daily
+    subgraph Analysis -- Batch, 6am daily
         CRON[Cron Trigger] --> L2[Lambda / Cloud Run]
         L2 --> FETCH[Fetch last 12h messages + classifications]
         DB --> FETCH
@@ -128,7 +128,7 @@ flowchart TB
     subgraph Delivery
         DB --> DASH[Web Dashboard]
         DB --> EMAIL[Daily Digest Email]
-        DB --> VOICE[Voice Briefing — TTS]
+        DB --> VOICE[Voice Briefing -- TTS]
     end
 
     subgraph Feedback Loop
@@ -139,8 +139,8 @@ flowchart TB
 ```
 
 **Why this split:**
-- **Pass 1** (classify) is stateless and fast — runs per-message in real-time as they arrive. Sub-second latency.
-- **Pass 2** (cross-reference) needs the full picture — runs as a batch over all recent messages. The CEO opens the dashboard and results are already there.
+- **Pass 1** (classify) is stateless and fast -- runs per-message in real-time as they arrive. Sub-second latency.
+- **Pass 2** (cross-reference) needs the full picture -- runs as a batch over all recent messages. The CEO opens the dashboard and results are already there.
 - **Corrections** from CEO overrides are stored per-user and injected as few-shot examples into Pass 1, so the system calibrates to each CEO's judgment over time.
 - **Cost**: Gemini 2.5 Flash at ~$0.01 per 20 messages. Even at 100 messages/day, under $1/month in LLM costs.
 
