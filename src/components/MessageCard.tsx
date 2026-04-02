@@ -10,6 +10,7 @@ interface MessageCardProps {
   classification: ClassifiedMessage;
   defaultExpanded?: boolean;
   index?: number;
+  compact?: boolean;
   onOverride?: (messageId: number, newCategory: Category) => void;
   wasOverridden?: boolean;
 }
@@ -31,6 +32,7 @@ export function MessageCard({
   classification,
   defaultExpanded = false,
   index = 0,
+  compact = false,
   onOverride,
   wasOverridden,
 }: MessageCardProps) {
@@ -81,7 +83,7 @@ export function MessageCard({
 
         <div className="flex items-center gap-2 shrink-0">
           <UrgencyBadge urgency={classification.urgency} />
-          <CategoryBadge category={classification.category} />
+          {!compact && <CategoryBadge category={classification.category} />}
           <svg
             className={`h-4 w-4 text-text-muted transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
             fill="none"

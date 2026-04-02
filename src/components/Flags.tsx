@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Flag, FlagCategory } from "@/lib/types";
 import { SeverityBadge } from "./StatusBadge";
 
@@ -58,20 +59,38 @@ function sortFlags(flags: Flag[]): Flag[] {
 
 export function Flags({ flags }: FlagsProps) {
   const sorted = sortFlags(flags);
+  const hasCritical = sorted.some((f) => f.severity === "critical");
+  const [open, setOpen] = useState(hasCritical);
 
   if (sorted.length === 0) return null;
 
   return (
-    <div className="fade-in-up" style={{ animationDelay: "100ms" }}>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="font-serif text-xl font-semibold text-text-primary tracking-tight">
-          Flags & Alerts
-        </h2>
-        <span className="font-mono text-[11px] text-text-muted tracking-wider">
-          {sorted.length} items
-        </span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="fade-in-up rounded-xl border border-border-default bg-bg-surface overflow-hidden" style={{ animationDelay: "100ms" }}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-6 py-4 flex items-center justify-between text-left"
+      >
+        <div className="flex items-center gap-3">
+          <h2 className="font-serif text-lg font-semibold text-text-primary tracking-tight">
+            Flags & Alerts
+          </h2>
+          <span className="font-mono text-[11px] text-text-muted tracking-wider">
+            {sorted.length} items
+          </span>
+          {hasCritical && (
+            <span className="bg-critical text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+              Critical
+            </span>
+          )}
+        </div>
+        <svg
+          className={`h-4 w-4 text-text-muted transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
         {sorted.map((flag, i) => {
           const style = categoryStyles[flag.category];
           return (
@@ -102,7 +121,7 @@ export function Flags({ flags }: FlagsProps) {
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }
