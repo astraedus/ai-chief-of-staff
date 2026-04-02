@@ -75,7 +75,7 @@ export function MessageModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-xl border border-border-default bg-bg-surface shadow-2xl fade-in-up"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border-default bg-bg-surface shadow-2xl fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
