@@ -74,6 +74,15 @@ export interface TriageResult {
   message_count: number;
 }
 
+// ── Corrections / Feedback ───────────────────────────────────────
+export interface Correction {
+  message_id: number;
+  original_category: Category;
+  corrected_category: Category;
+  message_summary: string;
+  timestamp: string;
+}
+
 // ── UI state ─────────────────────────────────────────────────────
 export type FilterTab = "all" | "decide" | "delegate" | "ignore";
 

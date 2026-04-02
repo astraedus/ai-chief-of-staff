@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { RawMessage, ClassifiedMessage, FilterTab } from "@/lib/types";
+import type { RawMessage, ClassifiedMessage, FilterTab, Category, Correction } from "@/lib/types";
 import { MessageCard } from "./MessageCard";
 
 interface TriageViewProps {
   messages: RawMessage[];
   classifications: ClassifiedMessage[];
+  onOverride?: (messageId: number, newCategory: Category) => void;
+  corrections?: Correction[];
 }
 
 const tabs: { key: FilterTab; label: string; activeColor: string }[] = [
@@ -16,7 +18,7 @@ const tabs: { key: FilterTab; label: string; activeColor: string }[] = [
   { key: "ignore", label: "Ignored", activeColor: "text-text-secondary border-text-muted" },
 ];
 
-export function TriageView({ messages, classifications }: TriageViewProps) {
+export function TriageView({ messages, classifications, onOverride, corrections }: TriageViewProps) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
   const classificationMap = new Map(
@@ -75,6 +77,7 @@ export function TriageView({ messages, classifications }: TriageViewProps) {
         {sorted.map((msg, i) => {
           const classification = classificationMap.get(msg.id);
           if (!classification) return null;
+          const wasOverridden = corrections?.some((c) => c.message_id === msg.id);
           return (
             <MessageCard
               key={msg.id}
@@ -82,6 +85,8 @@ export function TriageView({ messages, classifications }: TriageViewProps) {
               classification={classification}
               defaultExpanded={classification.category === "DECIDE" && activeTab === "decide"}
               index={i}
+              onOverride={onOverride}
+              wasOverridden={wasOverridden}
             />
           );
         })}

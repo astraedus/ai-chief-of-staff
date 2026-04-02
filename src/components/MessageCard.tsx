@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { RawMessage, ClassifiedMessage } from "@/lib/types";
+import type { RawMessage, ClassifiedMessage, Category } from "@/lib/types";
 import { ChannelIcon } from "./ChannelIcon";
 import { CategoryBadge, UrgencyBadge } from "./StatusBadge";
 
@@ -10,7 +10,11 @@ interface MessageCardProps {
   classification: ClassifiedMessage;
   defaultExpanded?: boolean;
   index?: number;
+  onOverride?: (messageId: number, newCategory: Category) => void;
+  wasOverridden?: boolean;
 }
+
+const CATEGORIES: Category[] = ["IGNORE", "DELEGATE", "DECIDE"];
 
 function formatTime(timestamp: string): string {
   const d = new Date(timestamp);
@@ -27,8 +31,11 @@ export function MessageCard({
   classification,
   defaultExpanded = false,
   index = 0,
+  onOverride,
+  wasOverridden,
 }: MessageCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const [showOverride, setShowOverride] = useState(false);
 
   const senderName = getSenderName(message.from);
   const firstLine = message.body.split("\n").find((l) => l.trim().length > 0) || "";
@@ -135,6 +142,49 @@ export function MessageCard({
                 </svg>
                 {classification.delegate_to}
               </span>
+            </div>
+          )}
+
+          {/* Override classification */}
+          {onOverride && (
+            <div>
+              <p className="font-mono text-[10px] font-bold text-text-muted uppercase tracking-[0.15em] mb-1.5">
+                Classification {wasOverridden && <span className="text-accent-gold">(corrected)</span>}
+              </p>
+              {!showOverride ? (
+                <button
+                  onClick={() => setShowOverride(true)}
+                  className="text-[12px] text-text-muted hover:text-text-primary transition-colors underline decoration-dotted underline-offset-2"
+                >
+                  Reclassify this message
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        onOverride(message.id, cat);
+                        setShowOverride(false);
+                      }}
+                      disabled={classification.category === cat}
+                      className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all ${
+                        classification.category === cat
+                          ? "bg-bg-overlay text-text-muted cursor-default ring-1 ring-accent-gold"
+                          : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-default hover:border-border-strong"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setShowOverride(false)}
+                    className="text-[11px] text-text-muted hover:text-text-primary ml-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

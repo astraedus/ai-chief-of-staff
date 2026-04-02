@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await runTriagePipeline(validMessages);
+    // Pass corrections (CEO feedback) as few-shot examples for the LLM
+    const corrections = Array.isArray(body.corrections) ? body.corrections : [];
+
+    const result = await runTriagePipeline(validMessages, corrections);
 
     return NextResponse.json({
       ...result,

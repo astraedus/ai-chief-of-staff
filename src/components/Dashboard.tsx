@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { RawMessage, TriageResult, ProcessingStatus } from "@/lib/types";
+import type { RawMessage, TriageResult, ProcessingStatus, Correction, Category } from "@/lib/types";
 import { Briefing } from "./Briefing";
 import { Flags } from "./Flags";
 import { TriageView } from "./TriageView";
@@ -18,6 +18,44 @@ export function Dashboard() {
     progress: 0,
     message: "",
   });
+  const [corrections, setCorrections] = useState<Correction[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("corrections");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
+
+  const handleOverride = useCallback(
+    (messageId: number, newCategory: Category) => {
+      if (!result) return;
+      const original = result.classifications.find((c) => c.id === messageId);
+      if (!original || original.category === newCategory) return;
+
+      const msg = messages.find((m) => m.id === messageId);
+      const summary = msg?.body.split("\n").find((l) => l.trim())?.slice(0, 80) || `Message #${messageId}`;
+
+      const correction: Correction = {
+        message_id: messageId,
+        original_category: original.category,
+        corrected_category: newCategory,
+        message_summary: summary,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Update classification in place
+      const updatedClassifications = result.classifications.map((c) =>
+        c.id === messageId ? { ...c, category: newCategory } : c
+      );
+      setResult({ ...result, classifications: updatedClassifications });
+
+      // Store correction
+      const updated = [...corrections, correction];
+      setCorrections(updated);
+      localStorage.setItem("corrections", JSON.stringify(updated));
+    },
+    [result, messages, corrections]
+  );
 
   const runTriage = useCallback(async (msgs: RawMessage[]) => {
     setMessages(msgs);
@@ -33,7 +71,7 @@ export function Dashboard() {
       const response = await fetch("/api/triage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: msgs }),
+        body: JSON.stringify({ messages: msgs, corrections }),
       });
 
       if (!response.ok) {
@@ -176,7 +214,7 @@ export function Dashboard() {
 
             <Briefing briefing={result.briefing} />
             <Flags flags={result.flags} />
-            <TriageView messages={messages} classifications={result.classifications} />
+            <TriageView messages={messages} classifications={result.classifications} onOverride={handleOverride} corrections={corrections} />
           </>
         )}
       </main>

@@ -3,6 +3,7 @@ import { buildClassificationPrompt, buildCrossReferencePrompt } from "./prompts"
 import type {
   RawMessage,
   ClassifiedMessage,
+  Correction,
   Thread,
   Flag,
   DailyBriefing,
@@ -23,9 +24,10 @@ function parseJSON<T>(text: string): T {
 // ── Pass 1: Classify each message ───────────────────────────────
 
 async function classifyMessages(
-  messages: RawMessage[]
+  messages: RawMessage[],
+  corrections: Correction[] = []
 ): Promise<ClassifiedMessage[]> {
-  const prompt = buildClassificationPrompt(messages);
+  const prompt = buildClassificationPrompt(messages, corrections);
   const model = getGeminiFlash();
 
   const result = await model.generateContent(prompt);
@@ -87,10 +89,11 @@ async function crossReference(
 // ── Main pipeline ───────────────────────────────────────────────
 
 export async function runTriagePipeline(
-  messages: RawMessage[]
+  messages: RawMessage[],
+  corrections: Correction[] = []
 ): Promise<TriageResult> {
-  // Pass 1: classify individually
-  const classifications = await classifyMessages(messages);
+  // Pass 1: classify individually (with correction context for few-shot learning)
+  const classifications = await classifyMessages(messages, corrections);
 
   // Pass 2: cross-reference and generate briefing
   const { threads, flags, briefing } = await crossReference(

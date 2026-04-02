@@ -1,7 +1,27 @@
-import type { RawMessage } from "./types";
+import type { RawMessage, Correction } from "./types";
+
+// ── Build correction context for few-shot learning ──────────────
+function buildCorrectionContext(corrections: Correction[]): string {
+  if (corrections.length === 0) return "";
+
+  const examples = corrections
+    .slice(-10) // last 10 corrections
+    .map(
+      (c) =>
+        `- "${c.message_summary}" was classified as ${c.original_category}, but the CEO corrected it to ${c.corrected_category}.`
+    )
+    .join("\n");
+
+  return `\n\nIMPORTANT — The CEO has previously corrected these classifications. Learn from their judgment and apply similar logic to analogous messages:\n${examples}\n`;
+}
 
 // ── Pass 1: Individual message classification ───────────────────
-export function buildClassificationPrompt(messages: RawMessage[]): string {
+export function buildClassificationPrompt(
+  messages: RawMessage[],
+  corrections: Correction[] = []
+): string {
+  const correctionContext = buildCorrectionContext(corrections);
+
   return `You are an AI Chief of Staff triaging a CEO's morning communications. For each message, determine:
 
 1. **Category**:
@@ -41,7 +61,7 @@ Respond with a JSON array of objects, one per message, with this exact schema:
 
 Here are the messages to classify:
 
-${JSON.stringify(messages, null, 2)}`;
+${JSON.stringify(messages, null, 2)}${correctionContext}`;
 }
 
 // ── Pass 2: Cross-reference, thread detection, briefing ─────────
