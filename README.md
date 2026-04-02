@@ -114,7 +114,7 @@ The current demo runs both passes synchronously on each request. In production, 
 
 ```mermaid
 flowchart TB
-    subgraph Ingestion -- Real-time
+    subgraph Ingestion["Ingestion -- Real-time"]
         G[Gmail API Watch] --> Q[Message Queue]
         S[Slack Events API] --> Q
         W[WhatsApp Business API] --> Q
@@ -123,7 +123,7 @@ flowchart TB
         P1 --> DB[(Database)]
     end
 
-    subgraph Analysis -- Batch, 6am daily
+    subgraph Analysis["Analysis -- Batch, 6am daily"]
         CRON[Cron Trigger] --> L2[Lambda / Cloud Run]
         L2 --> FETCH[Fetch last 12h messages + classifications]
         DB --> FETCH
@@ -138,7 +138,7 @@ flowchart TB
         DB --> VOICE[Voice Briefing -- TTS]
     end
 
-    subgraph Feedback Loop
+    subgraph Feedback["Feedback Loop"]
         DASH --> OVERRIDE[CEO Overrides Classification]
         OVERRIDE --> CORRECTIONS[(Corrections Store)]
         CORRECTIONS --> P1
