@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { RawMessage, ClassifiedMessage, Category } from "@/lib/types";
 import { ChannelIcon } from "./ChannelIcon";
 import { CategoryBadge, UrgencyBadge } from "./StatusBadge";
@@ -57,6 +57,9 @@ export function MessageModal({
       document.body.style.overflow = "";
     };
   }, [handleKeyDown]);
+
+  const [draftText, setDraftText] = useState(classification.drafted_response || "");
+  const [sent, setSent] = useState(false);
 
   const senderName = getSenderName(message.from);
   const senderEmail = getSenderEmail(message.from);
@@ -159,24 +162,37 @@ export function MessageModal({
             </div>
           )}
 
-          {/* Drafted response + send */}
+          {/* Drafted response — editable + send */}
           {classification.drafted_response && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <SectionLabel>Drafted Response</SectionLabel>
-                <button
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-accent-gold px-3 py-1.5 text-[11px] font-semibold text-text-inverse uppercase tracking-wider hover:bg-accent-gold-bright transition-colors"
-                  title="Send response (not connected in demo)"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                  </svg>
-                  Send
-                </button>
+                {sent ? (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-success uppercase tracking-wider">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Sent
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setSent(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-accent-gold px-3 py-1.5 text-[11px] font-semibold text-text-inverse uppercase tracking-wider hover:bg-accent-gold-bright transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                    </svg>
+                    Send
+                  </button>
+                )}
               </div>
-              <div className="text-[13px] text-text-primary whitespace-pre-wrap rounded-lg border border-[var(--info-border)] bg-[var(--info-bg)] p-4 leading-relaxed">
-                {classification.drafted_response}
-              </div>
+              <textarea
+                value={draftText}
+                onChange={(e) => setDraftText(e.target.value)}
+                disabled={sent}
+                rows={4}
+                className="w-full text-[13px] text-text-primary whitespace-pre-wrap rounded-lg border border-[var(--info-border)] bg-[var(--info-bg)] p-4 leading-relaxed resize-y focus:outline-none focus:ring-1 focus:ring-accent-gold/50 disabled:opacity-60 disabled:cursor-not-allowed"
+              />
             </div>
           )}
 

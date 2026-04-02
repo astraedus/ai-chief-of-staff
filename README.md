@@ -101,6 +101,49 @@ Test suites cover:
 - **Prompt construction**: Both passes include correct instructions, all message data, security/escalation detection
 - **Data integrity**: Sample dataset structure, sequential IDs, phishing message presence, crisis thread, deal renegotiation
 
+## Production architecture (proposed)
+
+The current demo runs both passes synchronously on each request. In production, the system decomposes naturally into real-time ingestion + batch analysis:
+
+```mermaid
+flowchart TB
+    subgraph Ingestion — Real-time
+        G[Gmail API Watch] --> Q[Message Queue]
+        S[Slack Events API] --> Q
+        W[WhatsApp Business API] --> Q
+        Q --> L1[Lambda / Cloud Run]
+        L1 --> P1[Pass 1: Classify]
+        P1 --> DB[(Database)]
+    end
+
+    subgraph Analysis — Batch, 6am daily
+        CRON[Cron Trigger] --> L2[Lambda / Cloud Run]
+        L2 --> FETCH[Fetch last 12h messages + classifications]
+        DB --> FETCH
+        FETCH --> P2[Pass 2: Cross-reference]
+        P2 --> BRIEF[Generate Briefing + Flags]
+        BRIEF --> DB
+    end
+
+    subgraph Delivery
+        DB --> DASH[Web Dashboard]
+        DB --> EMAIL[Daily Digest Email]
+        DB --> VOICE[Voice Briefing — TTS]
+    end
+
+    subgraph Feedback Loop
+        DASH --> OVERRIDE[CEO Overrides Classification]
+        OVERRIDE --> CORRECTIONS[(Corrections Store)]
+        CORRECTIONS --> P1
+    end
+```
+
+**Why this split:**
+- **Pass 1** (classify) is stateless and fast — runs per-message in real-time as they arrive. Sub-second latency.
+- **Pass 2** (cross-reference) needs the full picture — runs as a batch over all recent messages. The CEO opens the dashboard and results are already there.
+- **Corrections** from CEO overrides are stored per-user and injected as few-shot examples into Pass 1, so the system calibrates to each CEO's judgment over time.
+- **Cost**: Gemini 2.5 Flash at ~$0.01 per 20 messages. Even at 100 messages/day, under $1/month in LLM costs.
+
 ## Tech stack
 
 - **Next.js 16** (App Router, TypeScript, React 19)
@@ -121,8 +164,9 @@ src/
     Dashboard.tsx            # Main orchestrator: state, API calls, layout
     Briefing.tsx             # Executive summary with structured sections
     Flags.tsx                # Color-coded alert cards by severity
-    TriageView.tsx           # Filterable message list with tabs
-    MessageCard.tsx          # Expandable message with classification details
+    TriageView.tsx           # Three-column kanban (Decide | Delegate | Ignore)
+    MessageModal.tsx         # Detail modal with editable response + reclassify
+    MessageCard.tsx          # Compact kanban card with preview
     UploadData.tsx           # File upload handler
     ProcessingOverlay.tsx    # Loading states with progress indicator
     ChannelIcon.tsx          # Email/Slack/WhatsApp channel indicators
