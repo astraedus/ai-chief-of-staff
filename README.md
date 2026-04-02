@@ -2,6 +2,28 @@
 
 An executive communication triage system that processes a CEO's morning messages across email, Slack, and WhatsApp. It classifies each message by action required, detects cross-message relationships (escalating threads, contradictions, scheduling conflicts), flags security threats, and generates a concise daily briefing readable in under two minutes.
 
+## Screenshots
+
+### Landing Page
+Process 20 CEO messages across email, Slack, and WhatsApp with one click — or upload your own data.
+
+![Landing page](docs/screenshots/chief-of-staff-landing.png)
+
+### Message Triage
+Three-column kanban view: **Decide** (CEO must act), **Delegate** (assigned to someone), and **Ignore** (no action needed). Each card shows sender, urgency, and preview.
+
+![Triage view](docs/screenshots/chief-of-staff-triage.png)
+
+### Executive Briefing
+Daily briefing with immediate actions, decisions needed, flags and alerts — all generated from cross-referencing the full message set in Pass 2.
+
+![Executive briefing](docs/screenshots/chief-of-staff-briefing.png)
+
+### Message Detail
+Click any card to see full classification, security assessment, drafted response, and the option to reclassify.
+
+![Message detail modal](docs/screenshots/chief-of-staff-modal.png)
+
 ## Architecture
 
 The system uses a **two-pass LLM pipeline** -- the key architectural decision that separates this from a naive single-pass classifier:
