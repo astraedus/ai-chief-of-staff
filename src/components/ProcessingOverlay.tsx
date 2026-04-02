@@ -65,7 +65,7 @@ export function ProcessingOverlay({ status }: ProcessingOverlayProps) {
       </div>
 
       <p className="mt-4 text-[11px] text-text-muted">
-        Typically 15-30 seconds depending on message count
+        Two-pass analysis may take up to 60 seconds
       </p>
     </div>
   );

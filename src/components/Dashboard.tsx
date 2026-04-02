@@ -188,7 +188,7 @@ export function Dashboard() {
                 </svg>
                 Process Messages
               </button>
-              <span className="text-xs text-text-muted">or upload your own data</span>
+              <span className="text-sm text-text-secondary">or upload your own data</span>
             </div>
           </div>
         )}
