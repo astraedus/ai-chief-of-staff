@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runTriagePipeline } from "@/lib/triage";
+import { saveTriageSession, getCorrections } from "@/lib/db";
 import type { RawMessage } from "@/lib/types";
 
 // Validate a message has required fields
@@ -60,13 +61,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Pass corrections (CEO feedback) as few-shot examples for the LLM
-    const corrections = Array.isArray(body.corrections) ? body.corrections : [];
+    // Load corrections from DB, fall back to request body
+    let corrections = await getCorrections();
+    if (corrections.length === 0 && Array.isArray(body.corrections)) {
+      corrections = body.corrections;
+    }
+
+    // Determine source: 'sample' if messages match default count, else 'upload'
+    const source = body.source || "sample";
 
     const result = await runTriagePipeline(validMessages, corrections);
 
+    // Persist to Supabase (fire-and-forget style -- don't block response)
+    let sessionId: string | null = null;
+    try {
+      sessionId = await saveTriageSession(result, validMessages, source);
+    } catch (err) {
+      console.error("Non-critical: failed to persist session:", err);
+    }
+
     return NextResponse.json({
       ...result,
+      session_id: sessionId,
       warnings:
         invalidIndices.length > 0
           ? `${invalidIndices.length} message(s) were skipped due to invalid format.`
