@@ -12,7 +12,7 @@ flowchart TB
         A[Messages JSON] --> B[Validation & Parsing]
     end
 
-    subgraph Pass 1 -- Independent Classification
+    subgraph Pass1[Pass 1 -- Independent Classification]
         B --> C[Gemini 2.5 Flash]
         C --> D[Per-message classification]
         D --> D1[Category: Ignore / Delegate / Decide]
@@ -21,18 +21,25 @@ flowchart TB
         D --> D4[Drafted response]
     end
 
-    subgraph Pass 2 -- Cross-Reference & Synthesis
-        D1 & D2 & D3 & D4 --> E[All messages + classifications fed back]
+    subgraph Pass2[Pass 2 -- Cross-Reference and Synthesis]
+        D1 --> E[All classifications fed back]
+        D2 --> E
+        D3 --> E
+        D4 --> E
         E --> F[Gemini 2.5 Flash]
         F --> G[Thread detection]
-        F --> H[Conflict & contradiction detection]
-        F --> I[Cascading impact analysis]
+        F --> H[Conflict detection]
+        F --> I[Impact analysis]
         F --> J[Flag generation]
         F --> K[Daily briefing]
     end
 
     subgraph Output
-        G & H & I & J & K --> L[Structured JSON response]
+        G --> L[Structured JSON response]
+        H --> L
+        I --> L
+        J --> L
+        K --> L
         L --> M[Executive Dashboard UI]
     end
 ```
