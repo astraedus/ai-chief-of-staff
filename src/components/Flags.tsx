@@ -43,15 +43,14 @@ function CategoryIcon({ category }: { category: FlagCategory }) {
   }
 }
 
-const categoryColors: Record<FlagCategory, { border: string; bg: string; text: string }> = {
-  SECURITY: { border: "border-red-200", bg: "bg-red-50", text: "text-red-700" },
-  REVENUE: { border: "border-amber-200", bg: "bg-amber-50", text: "text-amber-700" },
-  PEOPLE: { border: "border-purple-200", bg: "bg-purple-50", text: "text-purple-700" },
-  SCHEDULING: { border: "border-blue-200", bg: "bg-blue-50", text: "text-blue-700" },
-  OPERATIONAL: { border: "border-orange-200", bg: "bg-orange-50", text: "text-orange-700" },
+const categoryStyles: Record<FlagCategory, { border: string; icon: string }> = {
+  SECURITY: { border: "border-l-critical", icon: "text-critical" },
+  REVENUE: { border: "border-l-warning", icon: "text-warning" },
+  PEOPLE: { border: "border-l-purple", icon: "text-purple" },
+  SCHEDULING: { border: "border-l-info", icon: "text-info" },
+  OPERATIONAL: { border: "border-l-warning", icon: "text-warning" },
 };
 
-// Sort flags: critical first, then warning, then info
 function sortFlags(flags: Flag[]): Flag[] {
   const order = { critical: 0, warning: 1, info: 2 };
   return [...flags].sort((a, b) => order[a.severity] - order[b.severity]);
@@ -63,36 +62,38 @@ export function Flags({ flags }: FlagsProps) {
   if (sorted.length === 0) return null;
 
   return (
-    <div>
-      <h2 className="text-base font-semibold text-gray-900 mb-3">
-        Flags & Alerts
-        <span className="ml-2 text-sm font-normal text-gray-500">
-          ({sorted.length})
+    <div className="fade-in-up" style={{ animationDelay: "100ms" }}>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="font-serif text-xl font-semibold text-text-primary tracking-tight">
+          Flags & Alerts
+        </h2>
+        <span className="font-mono text-[11px] text-text-muted tracking-wider">
+          {sorted.length} items
         </span>
-      </h2>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {sorted.map((flag, i) => {
-          const colors = categoryColors[flag.category];
+          const style = categoryStyles[flag.category];
           return (
             <div
               key={i}
-              className={`rounded-lg border ${colors.border} ${colors.bg} p-4 fade-in-up`}
-              style={{ animationDelay: `${i * 50}ms` }}
+              className={`rounded-lg border border-border-default bg-bg-surface border-l-[3px] ${style.border} p-4 fade-in-up card-interactive`}
+              style={{ animationDelay: `${(i + 3) * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2.5">
-                  <span className={`mt-0.5 ${colors.text}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`mt-0.5 ${style.icon}`}>
                     <CategoryIcon category={flag.category} />
                   </span>
                   <div>
-                    <h3 className={`text-sm font-semibold ${colors.text}`}>
+                    <h3 className="text-sm font-semibold text-text-primary">
                       {flag.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                    <p className="text-[13px] text-text-secondary mt-1.5 leading-relaxed">
                       {flag.description}
                     </p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      Related messages: {flag.related_message_ids.map((id) => `#${id}`).join(", ")}
+                    <p className="font-mono text-[10px] text-text-muted mt-2 tracking-wider">
+                      Messages {flag.related_message_ids.map((id) => `#${id}`).join(", ")}
                     </p>
                   </div>
                 </div>

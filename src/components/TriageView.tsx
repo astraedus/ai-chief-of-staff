@@ -9,11 +9,11 @@ interface TriageViewProps {
   classifications: ClassifiedMessage[];
 }
 
-const tabs: { key: FilterTab; label: string; color: string }[] = [
-  { key: "all", label: "All", color: "text-gray-900 border-gray-900" },
-  { key: "decide", label: "Decisions", color: "text-red-700 border-red-600" },
-  { key: "delegate", label: "Delegated", color: "text-amber-700 border-amber-500" },
-  { key: "ignore", label: "Ignored", color: "text-gray-500 border-gray-400" },
+const tabs: { key: FilterTab; label: string; activeColor: string }[] = [
+  { key: "all", label: "All", activeColor: "text-accent-gold border-accent-gold" },
+  { key: "decide", label: "Decisions", activeColor: "text-critical border-critical" },
+  { key: "delegate", label: "Delegated", activeColor: "text-warning border-warning" },
+  { key: "ignore", label: "Ignored", activeColor: "text-text-secondary border-text-muted" },
 ];
 
 export function TriageView({ messages, classifications }: TriageViewProps) {
@@ -36,7 +36,6 @@ export function TriageView({ messages, classifications }: TriageViewProps) {
     ignore: classifications.filter((c) => c.category === "IGNORE").length,
   };
 
-  // Sort: critical urgency first
   const urgencyOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   const sorted = [...filtered].sort((a, b) => {
     const ca = classificationMap.get(a.id);
@@ -46,32 +45,34 @@ export function TriageView({ messages, classifications }: TriageViewProps) {
   });
 
   return (
-    <div>
-      <h2 className="text-base font-semibold text-gray-900 mb-3">Message Triage</h2>
+    <div className="fade-in-up" style={{ animationDelay: "150ms" }}>
+      <h2 className="font-serif text-xl font-semibold text-text-primary tracking-tight mb-4">
+        Message Triage
+      </h2>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200">
+      <div className="flex gap-1 mb-5 border-b border-border-subtle">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.key
-                ? tab.color
-                : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
+                ? tab.activeColor
+                : "text-text-muted border-transparent hover:text-text-secondary hover:border-border-default"
             }`}
           >
             {tab.label}
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 font-mono text-[11px] opacity-60">
               {counts[tab.key]}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Message list */}
+      {/* Messages */}
       <div className="space-y-2">
-        {sorted.map((msg) => {
+        {sorted.map((msg, i) => {
           const classification = classificationMap.get(msg.id);
           if (!classification) return null;
           return (
@@ -80,11 +81,12 @@ export function TriageView({ messages, classifications }: TriageViewProps) {
               message={msg}
               classification={classification}
               defaultExpanded={classification.category === "DECIDE" && activeTab === "decide"}
+              index={i}
             />
           );
         })}
         {sorted.length === 0 && (
-          <div className="py-8 text-center text-sm text-gray-400">
+          <div className="py-10 text-center text-sm text-text-muted">
             No messages in this category.
           </div>
         )}

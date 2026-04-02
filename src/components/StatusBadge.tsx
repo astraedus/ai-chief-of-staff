@@ -8,15 +8,13 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({ category }: CategoryBadgeProps) {
   const styles: Record<Category, string> = {
-    DECIDE: "bg-red-50 text-red-700 ring-red-600/20",
-    DELEGATE: "bg-amber-50 text-amber-700 ring-amber-600/20",
-    IGNORE: "bg-gray-50 text-gray-600 ring-gray-500/20",
+    DECIDE: "bg-[var(--critical-bg)] text-critical border border-[var(--critical-border)]",
+    DELEGATE: "bg-[var(--warning-bg)] text-warning border border-[var(--warning-border)]",
+    IGNORE: "bg-bg-elevated text-text-muted border border-border-default",
   };
 
   return (
-    <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${styles[category]}`}
-    >
+    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wider uppercase ${styles[category]}`}>
       {category}
     </span>
   );
@@ -28,16 +26,14 @@ interface UrgencyBadgeProps {
 
 export function UrgencyBadge({ urgency }: UrgencyBadgeProps) {
   const styles: Record<Urgency, string> = {
-    critical: "bg-red-600 text-white",
-    high: "bg-amber-500 text-white",
-    medium: "bg-blue-100 text-blue-700",
-    low: "bg-gray-100 text-gray-500",
+    critical: "bg-critical text-white",
+    high: "bg-warning text-text-inverse",
+    medium: "bg-[var(--info-bg)] text-info border border-[var(--info-border)]",
+    low: "bg-bg-elevated text-text-muted border border-border-default",
   };
 
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${styles[urgency]}`}
-    >
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${styles[urgency]}`}>
       {urgency}
     </span>
   );
@@ -49,24 +45,13 @@ interface SeverityBadgeProps {
 
 export function SeverityBadge({ severity }: SeverityBadgeProps) {
   const styles: Record<FlagSeverity, string> = {
-    critical: "bg-red-600 text-white",
-    warning: "bg-amber-500 text-white",
-    info: "bg-blue-500 text-white",
-  };
-
-  const icons: Record<FlagSeverity, string> = {
-    critical: "!",
-    warning: "!",
-    info: "i",
+    critical: "bg-critical text-white",
+    warning: "bg-warning text-text-inverse",
+    info: "bg-info text-white",
   };
 
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${styles[severity]}`}
-    >
-      <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/25 text-[10px]">
-        {icons[severity]}
-      </span>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider shrink-0 ${styles[severity]}`}>
       {severity}
     </span>
   );

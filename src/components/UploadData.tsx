@@ -29,7 +29,6 @@ export function UploadData({ onUpload, isProcessing }: UploadDataProps) {
       alert("Failed to parse the JSON file. Please check the format.");
     }
 
-    // Reset so the same file can be re-uploaded
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -48,12 +47,12 @@ export function UploadData({ onUpload, isProcessing }: UploadDataProps) {
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isProcessing}
-        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-3.5 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-border-strong transition-all disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
         </svg>
-        Upload Messages
+        Upload Data
       </button>
     </>
   );
