@@ -1,0 +1,29 @@
+name: Supabase Keepalive
+
+# Hits /api/health twice a week (Mon + Thu, 10:17 UTC) to keep the
+# Supabase free-tier project alive. The 7-day pause threshold means we
+# need a max gap of 4 days between pings; Mon-Thu-Mon gives us a
+# Thu->Mon gap of 4 days max. The :17 minute offset avoids fleet-wide
+# :00 cron collisions.
+#
+# manual trigger via: gh workflow run "Supabase Keepalive"
+
+on:
+  schedule:
+    - cron: "17 10 * * 1,4"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase via /api/health
+        run: |
+          curl --fail-with-body \
+               --max-time 30 \
+               --retry 3 \
+               --retry-delay 15 \
+               --silent \
+               --show-error \
+               --write-out "HTTP %{http_code} in %{time_total}s\n" \
+               https://ai-chief-of-staff-one.vercel.app/api/health
